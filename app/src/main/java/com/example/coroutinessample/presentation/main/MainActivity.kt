@@ -34,8 +34,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupPokemonRecyclerView() {
         binding.pokemons.layoutManager = GridLayoutManager(this, 3)
-        vm.getSelectedPokemonType().observe(this) { selectedPokemonType ->
-                binding.pokemons.adapter = PokemonAdapter(selectedPokemonType.pokemons)
+        vm.getPokemonsToDisplay().observe(this) { pokemons ->
+                binding.pokemons.adapter = PokemonAdapter(pokemons)
         }
     }
 }

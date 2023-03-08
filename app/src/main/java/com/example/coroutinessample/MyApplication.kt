@@ -10,6 +10,7 @@ import com.example.coroutinessample.network.service.PokemonService
 import com.example.coroutinessample.network.type.PokemonTypeNetworkDataSource
 import com.example.coroutinessample.presentation.main.MainViewModel
 import com.example.coroutinessample.usecase.GetPokemonTypesUseCase
+import com.example.coroutinessample.usecase.GetPokemonsOfTypeUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -36,6 +37,7 @@ class MyApplication : Application() {
 
     private val useCaseModule = module {
         singleOf(::GetPokemonTypesUseCase)
+        singleOf(::GetPokemonsOfTypeUseCase)
     }
 
     override fun onCreate() {

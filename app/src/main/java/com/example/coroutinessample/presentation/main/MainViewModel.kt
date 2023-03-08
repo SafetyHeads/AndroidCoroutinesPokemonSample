@@ -4,33 +4,43 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.coroutinessample.domain.Pokemon
 import com.example.coroutinessample.domain.PokemonType
 import com.example.coroutinessample.usecase.GetPokemonTypesUseCase
+import com.example.coroutinessample.usecase.GetPokemonsOfTypeUseCase
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val getPokemonTypesUseCase: GetPokemonTypesUseCase
+    private val getPokemonTypesUseCase: GetPokemonTypesUseCase,
+    private val getPokemonsOfTypeUseCase: GetPokemonsOfTypeUseCase
 ) : ViewModel() {
 
-    private lateinit var fetchedPokemonTypes: List<PokemonType>
-
+    private var selectedPokemonType: PokemonType? = null
     private val pokemonTypes = MutableLiveData<List<PokemonType>>()
-    private val selectedPokemonType = MutableLiveData<PokemonType>()
+    private val pokemonesToDisplay = MutableLiveData<List<Pokemon>>()
 
     init {
         viewModelScope.launch {
-            fetchedPokemonTypes = getPokemonTypesUseCase.run()
-            pokemonTypes.postValue(fetchedPokemonTypes)
+            pokemonTypes.postValue(getPokemonTypesUseCase.run())
         }
     }
 
     fun getPokemonTypes() = pokemonTypes as LiveData<List<PokemonType>>
 
-    fun getSelectedPokemonType() = selectedPokemonType as LiveData<PokemonType>
+    fun getPokemonsToDisplay() = pokemonesToDisplay as LiveData<List<Pokemon>>
 
     fun selectPokemonType(type: PokemonType) {
-        if (fetchedPokemonTypes.contains(type)) {
-            selectedPokemonType.postValue(type)
+        if (type != selectedPokemonType) {
+            pokemonesToDisplay.postValue(emptyList())
+        }
+        selectedPokemonType = type
+        viewModelScope.launch {
+            getPokemonsOfTypeUseCase.run(type, (pokemonesToDisplay.value?.size ?: 0).toLong())
+                .collect {
+                    val newPokemons = (pokemonesToDisplay.value ?: emptyList()) + it
+                    pokemonesToDisplay.postValue(newPokemons)
+                }
         }
     }
 }
